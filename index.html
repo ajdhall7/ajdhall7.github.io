@@ -73,7 +73,7 @@
     }
 
     .slide {
-      flex: 0 0 100%;
+      flex: 0 0 100vw;
       display: flex;
       justify-content: center;
       padding: 10px 0 18px;
@@ -334,7 +334,7 @@
     let trackWidth = 0;
 
     function updateTransform(offsetX = 0){
-      const containerWidth = document.body.clientWidth; // viewport width for slide width
+      const containerWidth = window.innerWidth; // viewport width for slide width
       track.style.transition = offsetX === 0 ? "transform 0.28s ease-out" : "none";
       track.style.transform = `translateX(${-(index * containerWidth) + offsetX}px)`;
     }
@@ -406,7 +406,9 @@
       carouselEl.addEventListener("touchmove", onTouchMove, { passive: false });
       carouselEl.addEventListener("touchend", onTouchEnd, { passive: false });
 
-      window.addEventListener("resize", resize);
+      window.addEventListener("resize", () => {
+  updateTransform(0);
+});
     })();
   </script>
 </body>
