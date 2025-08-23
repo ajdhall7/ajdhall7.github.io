@@ -13,6 +13,55 @@
   .toolbar { display:flex; justify-content:center; gap:10px; padding:10px 12px; }
   .btn { border:none; background:#1877f2; color:#fff; font-weight:700; padding:10px 16px; border-radius:8px; cursor:pointer; }
 
+  /* Flip card container */
+.flip-card {
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px; /* Adds depth for the 3D flip */
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Front (image side) */
+.flip-card-front {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Back (seller info) */
+.flip-card-back {
+  background: #f0f0f0;
+  color: black;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
   /* Carousel container */
   .carousel-shell { width:100vw; position:relative; overflow:hidden; display:flex; align-items:center; }
   .track { display:flex; transition:transform 0.3s ease; will-change:transform; }
@@ -68,32 +117,14 @@
 
 <section class="grid" id="grid"></section>
 
-<div id="voteSection">
-  <button onclick="submitVote()">Vote</button>
-</div>
-
-<div id="afterVote" style="display:none;">
-  <h2>Your Facebook Marketplace FOTM:</h2>
-  <div id="voteResult"></div>
-</div>
-
-<script>
-function submitVote() {
-  // Example: Just grab currently displayed card
-  const currentCard = document.querySelector(".flip-card-front img").src;
-  
-  document.getElementById("voteResult").innerHTML =
-    `<img src="${currentCard}" width="200"><p>Voted on ${new Date().toLocaleDateString()}</p>`;
-
-  document.getElementById("voteSection").style.display = "none";
-  document.getElementById("afterVote").style.display = "block";
-
-  // Save vote history (localStorage)
-  let history = JSON.parse(localStorage.getItem("voteHistory") || "[]");
-  history.push({ img: currentCard, date: new Date().toLocaleString() });
-  localStorage.setItem("voteHistory", JSON.stringify(history));
+<section class="results" id="results">
+  <div class="results-card">
+    <h2>Your Facebook Marketplace Find of the Month:</h2>
+    <div class="title" id="chosenTitle"></div>
+    <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
+  </div>
+</section>
 }
-</script>
 
 <script>
 const VOTE_KEY = "vote_2025_08";
