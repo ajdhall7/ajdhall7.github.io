@@ -4,25 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Marketplace Find of the Month</title>
-
-  <!-- Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
+    :root {
       --max-card-width: 520px;
-      --swipe-threshold: 50px;
     }
 
     html, body {
-      height: 100%;
       margin: 0;
+      padding: 0;
       font-family: "Poppins", system-ui, -apple-system, Arial, sans-serif;
       background: #f0f2f5;
       color: #1c1e21;
       overflow-x: hidden;
-      overscroll-behavior-x: none;
-      -webkit-text-size-adjust: 100%;
     }
 
     header {
@@ -53,9 +48,9 @@
       cursor: pointer;
     }
 
-    /* ===== Carousel (Swipe) ===== */
+    /* ===== Carousel ===== */
     .carousel-shell {
-      width: 100vw; /* match slides */
+      width: 100vw;
       overflow: hidden;
     }
     .carousel {
@@ -63,12 +58,11 @@
     }
     .track {
       display: flex;
-      transition: transform 0.28s ease-out;
-      touch-action: pan-y;
+      transition: transform 0.3s ease;
       will-change: transform;
     }
     .slide {
-      flex: 0 0 100%; /* slide takes full carousel-shell width */
+      flex: 0 0 100%;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -82,34 +76,17 @@
       padding: 14px;
       text-align: center;
     }
-
-    .date {
-      font-size: 13px;
-      color: #606770;
-      margin-bottom: 8px;
-    }
-
+    .date { font-size: 13px; color: #606770; margin-bottom: 8px; }
     .frame {
       width: 100%;
       aspect-ratio: 1206 / 1405;
-      background: #fff;
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid #e4e6eb;
+      background: #fff;
     }
-    .frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .title {
-      margin-top: 12px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
+    .frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .title { margin-top: 12px; font-size: 18px; font-weight: 700; }
     .vote-btn {
       margin-top: 12px;
       width: 100%;
@@ -124,12 +101,7 @@
     }
 
     /* ===== Grid View ===== */
-    .grid {
-      display: none;
-      padding: 10px 12px 20px;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
+    .grid { display: none; padding: 10px 12px 20px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     .grid-item {
       background: #fff;
       border-radius: 10px;
@@ -139,32 +111,13 @@
       flex-direction: column;
       align-items: center;
     }
-    .grid-item .date {
-      margin-bottom: 6px;
-      font-size: 12px;
-    }
-    .grid-item .frame {
-      width: 100%;
-      aspect-ratio: 1206 / 1405;
-      border-radius: 8px;
-    }
-    .grid-item .title {
-      font-size: 14px;
-      margin-top: 8px;
-      text-align: center;
-    }
-    .grid-item .vote-btn {
-      margin-top: 8px;
-      padding: 10px;
-      font-size: 14px;
-    }
+    .grid-item .date { margin-bottom: 6px; font-size: 12px; }
+    .grid-item .frame { width: 100%; aspect-ratio: 1206 / 1405; border-radius: 8px; }
+    .grid-item .title { font-size: 14px; margin-top: 8px; text-align: center; }
+    .grid-item .vote-btn { margin-top: 8px; padding: 10px; font-size: 14px; }
 
-    /* ===== Results Screen ===== */
-    .results {
-      display: none;
-      padding: 18px 12px 28px;
-      text-align: center;
-    }
+    /* ===== Results ===== */
+    .results { display: none; padding: 18px 12px 28px; text-align: center; }
     .results-card {
       width: min(95vw, var(--max-card-width));
       margin: 0 auto;
@@ -173,18 +126,9 @@
       box-shadow: 0 6px 14px rgba(0,0,0,0.12);
       padding: 16px;
     }
-    .results h2 {
-      font-size: 18px;
-      color: #1877f2;
-      font-weight: 700;
-      margin: 0 0 10px;
-    }
-    .results .title {
-      margin: 10px 0 14px;
-    }
-    .results .frame {
-      margin: 0 auto;
-    }
+    .results h2 { font-size: 18px; color: #1877f2; font-weight: 700; margin: 0 0 10px; }
+    .results .title { margin: 10px 0 14px; }
+    .results .frame { margin: 0 auto; }
 
     /* Utilities */
     .hidden { display: none !important; }
@@ -193,36 +137,29 @@
 </head>
 <body>
   <header>Facebook Marketplace Find of the Month</header>
-
   <div class="toolbar">
     <button class="btn" onclick="switchView('carousel')">Carousel View</button>
     <button class="btn" onclick="switchView('grid')">Grid View</button>
   </div>
 
-  <!-- Carousel -->
   <section class="carousel-shell" id="carouselShell">
     <div class="carousel">
       <div class="track" id="track"></div>
     </div>
   </section>
 
-  <!-- Grid -->
   <section class="grid" id="grid"></section>
 
-  <!-- Results -->
   <section class="results" id="results">
     <div class="results-card">
       <h2>Your Facebook Marketplace Find of the Month:</h2>
       <div class="title" id="chosenTitle"></div>
-      <div class="frame">
-        <img id="chosenImage" alt="Selected Find">
-      </div>
+      <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
     </div>
   </section>
 
   <script>
     const VOTE_KEY = "vote_2025_08";
-
     const finds = [
       { date: "Aug 5, 2025", title: "$10 African American", img: "find5.jpg" },
       { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "find6.jpg" },
@@ -243,15 +180,16 @@
     const chosenTitle = document.getElementById("chosenTitle");
     const chosenImage = document.getElementById("chosenImage");
 
-    /* ===== RENDER ===== */
+    let index = 0, startX = 0, currentX = 0, dragging = false;
+
+    function escapeQuotes(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
     function renderCarousel(){
       track.innerHTML = finds.map(f => `
         <div class="slide">
           <div class="card">
             <div class="date">${f.date}</div>
-            <div class="frame">
-              <img src="${f.img}" alt="${f.title}">
-            </div>
+            <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
             <div class="title">${f.title}</div>
             <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote for this Find</button>
           </div>
@@ -264,9 +202,7 @@
       grid.innerHTML = finds.map(f => `
         <div class="grid-item">
           <div class="date">${f.date}</div>
-          <div class="frame">
-            <img src="${f.img}" alt="${f.title}">
-          </div>
+          <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
           <div class="title">${f.title}</div>
           <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote</button>
         </div>
@@ -274,85 +210,69 @@
     }
 
     function switchView(view){
-      if(view === "grid"){
-        carouselShell.classList.add("hidden");
-        grid.classList.add("show-grid");
-        results.classList.add("hidden");
+      if(view==='grid'){
+        carouselShell.classList.add('hidden');
+        grid.classList.add('show-grid');
+        results.classList.add('hidden');
       } else {
-        grid.classList.remove("show-grid");
-        results.classList.add("hidden");
-        carouselShell.classList.remove("hidden");
+        grid.classList.remove('show-grid');
+        results.classList.add('hidden');
+        carouselShell.classList.remove('hidden');
         updateTransform();
       }
     }
 
-    function vote(title, img){
-      localStorage.setItem(VOTE_KEY, JSON.stringify({ title, img }));
+    function vote(title,img){
+      localStorage.setItem(VOTE_KEY, JSON.stringify({title,img}));
       showResults();
     }
 
     function showResults(){
       const saved = localStorage.getItem(VOTE_KEY);
       if(!saved) return;
-      const { title, img } = JSON.parse(saved);
+      const {title,img} = JSON.parse(saved);
       chosenTitle.textContent = title;
       chosenImage.src = img;
 
-      carouselShell.classList.add("hidden");
-      grid.classList.remove("show-grid");
-      grid.classList.add("hidden");
-      results.classList.remove("hidden");
+      carouselShell.classList.add('hidden');
+      grid.classList.remove('show-grid');
+      grid.classList.add('hidden');
+      results.classList.remove('hidden');
     }
 
-    /* ===== SWIPE LOGIC ===== */
-    let index = 0;
-    let startX = 0;
-    let currentX = 0;
-    let dragging = false;
-
     function updateTransform(offsetX=0){
-      const slide = track.querySelector('.slide');
+      const slide = track.children[0];
       if(!slide) return;
-      const slideWidth = slide.offsetWidth;
-      track.style.transition = offsetX===0 ? "transform 0.28s ease-out" : "none";
-      track.style.transform = `translateX(${-(index * slideWidth) + offsetX}px)`;
+      const slideWidth = slide.getBoundingClientRect().width;
+      track.style.transform = `translateX(${-(index*slideWidth)+offsetX}px)`;
+      track.style.transition = offsetX===0 ? 'transform 0.3s ease' : 'none';
     }
 
     function onTouchStart(e){
-      if(carouselShell.classList.contains("hidden")) return;
       dragging = true;
       startX = e.touches[0].clientX;
       currentX = startX;
-      track.style.transition = "none";
+      track.style.transition = 'none';
     }
 
     function onTouchMove(e){
       if(!dragging) return;
-      const x = e.touches[0].clientX;
-      const delta = x - startX;
-      if(Math.abs(delta) > 5) e.preventDefault();
-      const atStart = index === 0 && delta > 0;
-      const atEnd = index === finds.length - 1 && delta < 0;
-      const damp = (atStart || atEnd) ? 0.35 : 1;
-      updateTransform(delta * damp);
-      currentX = x;
+      const delta = e.touches[0].clientX - startX;
+      e.preventDefault();
+      updateTransform(delta);
+      currentX = e.touches[0].clientX;
     }
 
     function onTouchEnd(){
       if(!dragging) return;
       dragging = false;
       const delta = currentX - startX;
-      const threshold = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold'));
-      if(delta > threshold && index > 0) index--;
-      else if(delta < -threshold && index < finds.length - 1) index++;
+      const slideWidth = track.children[0].getBoundingClientRect().width;
+      if(delta > slideWidth/4 && index>0) index--;
+      else if(delta < -slideWidth/4 && index<track.children.length-1) index++;
       updateTransform(0);
     }
 
-    function escapeQuotes(s){
-      return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
-    /* ===== INIT ===== */
     (function init(){
       renderCarousel();
       renderGrid();
@@ -360,11 +280,10 @@
       else switchView('carousel');
 
       const carouselEl = document.querySelector('.carousel');
-      carouselEl.addEventListener("touchstart", onTouchStart, { passive:false });
-      carouselEl.addEventListener("touchmove", onTouchMove, { passive:false });
-      carouselEl.addEventListener("touchend", onTouchEnd, { passive:false });
-
-      window.addEventListener("resize", updateTransform);
+      carouselEl.addEventListener('touchstart', onTouchStart,{passive:false});
+      carouselEl.addEventListener('touchmove', onTouchMove,{passive:false});
+      carouselEl.addEventListener('touchend', onTouchEnd);
+      window.addEventListener('resize', ()=>updateTransform(0));
     })();
   </script>
 </body>
