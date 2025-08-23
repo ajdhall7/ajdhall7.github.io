@@ -10,9 +10,7 @@
 
   <style>
     :root{
-      /* Max content width for the portrait frame on mobile */
       --max-card-width: 520px;
-      /* Slide threshold in px */
       --swipe-threshold: 50px;
     }
 
@@ -22,8 +20,8 @@
       font-family: "Poppins", system-ui, -apple-system, Arial, sans-serif;
       background: #f0f2f5;
       color: #1c1e21;
-      overflow-x: hidden;               /* Prevent page side-scroll */
-      overscroll-behavior-x: none;      /* Lock horizontal overscroll */
+      overflow-x: hidden;
+      overscroll-behavior-x: none;
       -webkit-text-size-adjust: 100%;
     }
 
@@ -57,37 +55,25 @@
 
     /* ===== Carousel (Swipe) ===== */
     .carousel-shell {
-      width: 95vw;
-      display: block;
+      width: 100vw; /* match slides */
+      overflow: hidden;
     }
     .carousel {
-      width: 100vw;
-      overflow: hidden;                 /* Track slides; we manage movement via transform */
       display: flex;
-    }
-    .carousel-item {
-      display: flex;
-      flex-direction: row;
-      justify-content: center; /* Horizontally center */
-      align-items: center;    /* Vertically center */
     }
     .track {
       display: flex;
-      flex-direction: row;
-      will-change: transform;
       transition: transform 0.28s ease-out;
-      touch-action: pan-y;              /* Allow vertical scroll, we handle horizontal */
+      touch-action: pan-y;
+      will-change: transform;
     }
-
     .slide {
-      flex: 0 0 100vw;
+      flex: 0 0 100%; /* slide takes full carousel-shell width */
       display: flex;
-      flex-direction: row;
       justify-content: center;
       align-items: center;
       padding: 10px 0 18px;
     }
-
     .card {
       width: min(95vw, var(--max-card-width));
       background: #fff;
@@ -103,7 +89,6 @@
       margin-bottom: 8px;
     }
 
-    /* Fixed portrait frame: EXACT 1206 x 1405 aspect box */
     .frame {
       width: 100%;
       aspect-ratio: 1206 / 1405;
@@ -115,7 +100,7 @@
     .frame img {
       width: 100%;
       height: 100%;
-      object-fit: contain;  /* No cropping; fits inside the 1206x1405 box */
+      object-fit: contain;
       display: block;
     }
 
@@ -201,7 +186,7 @@
       margin: 0 auto;
     }
 
-    /* Utilities (hidden states) */
+    /* Utilities */
     .hidden { display: none !important; }
     .show-grid { display: grid; }
   </style>
@@ -236,11 +221,8 @@
   </section>
 
   <script>
-    /* ============ CONFIG ============ */
-    // Update this key each month (e.g., "vote_2025_08") if you want to reset voting without clearing the browser.
     const VOTE_KEY = "vote_2025_08";
 
-    // Add your finds here (date, title, img)
     const finds = [
       { date: "Aug 5, 2025", title: "$10 African American", img: "find5.jpg" },
       { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "find6.jpg" },
@@ -252,18 +234,8 @@
       { date: "Aug 13, 2025", title: "Fish Pizza Oven", img: "find13.jpg" },
       { date: "Aug 14, 2025", title: "Breastmilk soap bars", img: "find14.jpg" },
       { date: "Aug 15, 2025", title: "2003 BMW (YN)", img: "find15.jpg" },
-      { date: "Aug 16, 2025", title: "Tiger (ON SALE)", img: "find16.jpg" },
-      { date: "Aug 17, 2025", title: "Taco Bell Dog", img: "find17.jpg" },
-      { date: "Aug 18, 2025", title: "LeBron Barbie", img: "find18.jpg" },
-      { date: "Aug 19, 2025", title: "Biggest Dinosaur Eva", img: "find19.jpg" },
-      { date: "Aug 20, 2025", title: "2021 GMC (Hippo)", img: "find20.jpg" },
-      { date: "Aug 21, 2025", title: "Fake Blueberry Pie", img: "find21.jpg" },
-      { date: "Aug 22, 2025", title: "New Hamburger Buns", img: "find22.jpg" },
-      { date: "Aug 23, 2025", title: "Mosquito Head Cover", img: "find23.jpg" },
-      // ... add more up to ~30 for the month
     ];
 
-    /* ============ ELEMENTS ============ */
     const track = document.getElementById("track");
     const carouselShell = document.getElementById("carouselShell");
     const grid = document.getElementById("grid");
@@ -271,8 +243,8 @@
     const chosenTitle = document.getElementById("chosenTitle");
     const chosenImage = document.getElementById("chosenImage");
 
-    /* ============ RENDERING ============ */
-    function renderCarousel() {
+    /* ===== RENDER ===== */
+    function renderCarousel(){
       track.innerHTML = finds.map(f => `
         <div class="slide">
           <div class="card">
@@ -288,7 +260,7 @@
       updateTransform();
     }
 
-    function renderGrid() {
+    function renderGrid(){
       grid.innerHTML = finds.map(f => `
         <div class="grid-item">
           <div class="date">${f.date}</div>
@@ -301,9 +273,8 @@
       `).join("");
     }
 
-    /* ============ VIEW TOGGLE ============ */
     function switchView(view){
-      if (view === "grid"){
+      if(view === "grid"){
         carouselShell.classList.add("hidden");
         grid.classList.add("show-grid");
         results.classList.add("hidden");
@@ -311,11 +282,10 @@
         grid.classList.remove("show-grid");
         results.classList.add("hidden");
         carouselShell.classList.remove("hidden");
-        updateTransform(); // keep slide position correct
+        updateTransform();
       }
     }
 
-    /* ============ VOTING ============ */
     function vote(title, img){
       localStorage.setItem(VOTE_KEY, JSON.stringify({ title, img }));
       showResults();
@@ -323,101 +293,78 @@
 
     function showResults(){
       const saved = localStorage.getItem(VOTE_KEY);
-      if (!saved) return;
+      if(!saved) return;
       const { title, img } = JSON.parse(saved);
       chosenTitle.textContent = title;
       chosenImage.src = img;
 
-      // Show results
       carouselShell.classList.add("hidden");
       grid.classList.remove("show-grid");
       grid.classList.add("hidden");
       results.classList.remove("hidden");
     }
 
-    /* ============ SWIPE / SLIDE LOGIC ============ */
+    /* ===== SWIPE LOGIC ===== */
     let index = 0;
     let startX = 0;
     let currentX = 0;
     let dragging = false;
-    let trackWidth = 0;
 
-    function updateTransform(offsetX = 0){
-      const containerWidth = window.innerWidth; // viewport width for slide width
-      track.style.transition = offsetX === 0 ? "transform 0.28s ease-out" : "none";
-      track.style.transform = `translateX(${-(index * containerWidth) + offsetX}px)`;
+    function updateTransform(offsetX=0){
+      const slide = track.querySelector('.slide');
+      if(!slide) return;
+      const slideWidth = slide.offsetWidth;
+      track.style.transition = offsetX===0 ? "transform 0.28s ease-out" : "none";
+      track.style.transform = `translateX(${-(index * slideWidth) + offsetX}px)`;
     }
 
     function onTouchStart(e){
-      // If already voted/results showing, ignore
-      if (!carouselShell || carouselShell.classList.contains("hidden")) return;
-
+      if(carouselShell.classList.contains("hidden")) return;
       dragging = true;
       startX = e.touches[0].clientX;
       currentX = startX;
       track.style.transition = "none";
     }
+
     function onTouchMove(e){
-      if (!dragging) return;
+      if(!dragging) return;
       const x = e.touches[0].clientX;
       const delta = x - startX;
-
-      // prevent page horizontal scroll while dragging
-      if (Math.abs(delta) > 5) e.preventDefault();
-
-      // slight resistance at bounds
+      if(Math.abs(delta) > 5) e.preventDefault();
       const atStart = index === 0 && delta > 0;
       const atEnd = index === finds.length - 1 && delta < 0;
       const damp = (atStart || atEnd) ? 0.35 : 1;
-
       updateTransform(delta * damp);
       currentX = x;
     }
-    function onTouchEnd(){
-      if (!dragging) return;
-      dragging = false;
 
+    function onTouchEnd(){
+      if(!dragging) return;
+      dragging = false;
       const delta = currentX - startX;
-      if (delta > parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index > 0){
-        index--;
-      } else if (delta < -parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index < finds.length - 1){
-        index++;
-      }
+      const threshold = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold'));
+      if(delta > threshold && index > 0) index--;
+      else if(delta < -threshold && index < finds.length - 1) index++;
       updateTransform(0);
     }
 
-    /* ============ HELPERS ============ */
     function escapeQuotes(s){
       return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    function resize(){
-      // Keep current slide aligned on rotation/resize
-      updateTransform(0);
-    }
-
-    /* ============ INIT ============ */
+    /* ===== INIT ===== */
     (function init(){
-      // If already voted, go straight to results
-      if (localStorage.getItem(VOTE_KEY)) {
-        renderCarousel();
-        renderGrid();
-        showResults();
-      } else {
-        renderCarousel();
-        renderGrid();
-        switchView("carousel");
-      }
+      renderCarousel();
+      renderGrid();
+      if(localStorage.getItem(VOTE_KEY)) showResults();
+      else switchView('carousel');
 
-      // Touch events for swipe
       const carouselEl = document.querySelector('.carousel');
-      carouselEl.addEventListener("touchstart", onTouchStart, { passive: false });
-      carouselEl.addEventListener("touchmove", onTouchMove, { passive: false });
-      carouselEl.addEventListener("touchend", onTouchEnd, { passive: false });
+      carouselEl.addEventListener("touchstart", onTouchStart, { passive:false });
+      carouselEl.addEventListener("touchmove", onTouchMove, { passive:false });
+      carouselEl.addEventListener("touchend", onTouchEnd, { passive:false });
 
-      window.addEventListener("resize", () => {
-  updateTransform(0);
-});
+      window.addEventListener("resize", updateTransform);
     })();
   </script>
 </body>
