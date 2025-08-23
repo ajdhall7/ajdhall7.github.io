@@ -68,13 +68,32 @@
 
 <section class="grid" id="grid"></section>
 
-<section class="results" id="results">
-  <div class="results-card">
-    <h2>Your Facebook Marketplace Find of the Month:</h2>
-    <div class="title" id="chosenTitle"></div>
-    <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
-  </div>
-</section>
+<div id="voteSection">
+  <button onclick="submitVote()">Vote</button>
+</div>
+
+<div id="afterVote" style="display:none;">
+  <h2>Your Facebook Marketplace FOTM:</h2>
+  <div id="voteResult"></div>
+</div>
+
+<script>
+function submitVote() {
+  // Example: Just grab currently displayed card
+  const currentCard = document.querySelector(".flip-card-front img").src;
+  
+  document.getElementById("voteResult").innerHTML =
+    `<img src="${currentCard}" width="200"><p>Voted on ${new Date().toLocaleDateString()}</p>`;
+
+  document.getElementById("voteSection").style.display = "none";
+  document.getElementById("afterVote").style.display = "block";
+
+  // Save vote history (localStorage)
+  let history = JSON.parse(localStorage.getItem("voteHistory") || "[]");
+  history.push({ img: currentCard, date: new Date().toLocaleString() });
+  localStorage.setItem("voteHistory", JSON.stringify(history));
+}
+</script>
 
 <script>
 const VOTE_KEY = "vote_2025_08";
