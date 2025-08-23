@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marketplace Find of the Month</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root { --max-card-width: 520px; --swipe-threshold: 50px; }
-  html,body { margin:0; padding:0; font-family:"Poppins", system-ui, -apple-system, Arial, sans-serif; background:#f0f2f5; color:#1c1e21; overflow-x:hidden; }
+  :root { --max-card-width: 520px; --swipe-threshold:50px; }
+  html, body { margin:0; padding:0; font-family:"Poppins", system-ui, -apple-system, Arial, sans-serif; background:#f0f2f5; color:#1c1e21; overflow-x:hidden; }
   header { background:#1877f2; color:#fff; text-align:center; padding:16px 12px; font-size:20px; font-weight:700; position:sticky; top:0; z-index:10; }
   .toolbar { display:flex; justify-content:center; gap:10px; padding:10px 12px; }
   .btn { border:none; background:#1877f2; color:#fff; font-weight:700; padding:10px 16px; border-radius:8px; cursor:pointer; }
 
-  /* Carousel */
-  .carousel-shell { width:100vw; overflow:hidden; }
-  .carousel { display:flex; justify-content:center; }
-  .track { display:flex; transition:transform 0.28s ease; will-change:transform; }
-  .slide { flex:0 0 auto; display:flex; justify-content:center; align-items:center; padding:10px 0 18px; width:85vw; }
-  .card { width:min(95%,var(--max-card-width)); background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:14px; text-align:center; }
+  /* Carousel container */
+  .carousel-shell { width:100vw; position:relative; overflow:hidden; display:flex; align-items:center; }
+  .track { display:flex; transition:transform 0.3s ease; will-change:transform; }
+  .slide { flex:0 0 auto; display:flex; justify-content:center; align-items:center; width:80vw; padding:10px 0; }
+  .card { width:min(95%, var(--max-card-width)); background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:14px; text-align:center; }
 
-  .date { font-size:13px; color:#606770; margin-bottom:8px; }
   .frame { width:100%; aspect-ratio:1206/1405; border-radius:10px; overflow:hidden; border:1px solid #e4e6eb; background:#fff; }
   .frame img { width:100%; height:100%; object-fit:contain; display:block; }
+
+  .date { font-size:13px; color:#606770; margin-bottom:8px; }
   .title { margin-top:12px; font-size:18px; font-weight:700; }
   .vote-btn { margin-top:12px; width:100%; border:none; padding:12px 16px; border-radius:10px; cursor:pointer; font-size:15px; font-weight:700; background:#42b72a; color:#fff; }
 
-  /* Grid */
+  /* Grid view */
   .grid { display:none; padding:10px 12px 20px; gap:12px; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
   .grid-item { background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; align-items:center; }
   .grid-item .date { margin-bottom:6px; font-size:12px; }
@@ -33,15 +33,20 @@
   .grid-item .title { font-size:14px; margin-top:8px; text-align:center; }
   .grid-item .vote-btn { margin-top:8px; padding:10px; font-size:14px; }
 
-  /* Results */
+  /* Results view */
   .results { display:none; padding:18px 12px 28px; text-align:center; }
-  .results-card { width:min(95%,var(--max-card-width)); margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:16px; }
+  .results-card { width:min(95%, var(--max-card-width)); margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:16px; }
   .results h2 { font-size:18px; color:#1877f2; font-weight:700; margin:0 0 10px; }
   .results .title { margin:10px 0 14px; }
   .results .frame { margin:0 auto; }
 
   .hidden { display:none !important; }
   .show-grid { display:grid; }
+
+  /* Navigation arrows */
+  .arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.3); border:none; color:white; font-size:2rem; width:40px; height:60px; cursor:pointer; border-radius:6px; z-index:5; }
+  .arrow.left { left:10px; }
+  .arrow.right { right:10px; }
 </style>
 </head>
 <body>
@@ -52,9 +57,9 @@
 </div>
 
 <section class="carousel-shell" id="carouselShell">
-  <div class="carousel">
-    <div class="track" id="track"></div>
-  </div>
+  <button class="arrow left" onclick="prevSlide()">‹</button>
+  <div class="track" id="track"></div>
+  <button class="arrow right" onclick="nextSlide()">›</button>
 </section>
 
 <section class="grid" id="grid"></section>
@@ -70,11 +75,11 @@
 <script>
 const VOTE_KEY = "vote_2025_08";
 const finds = [
-  { date: "Aug 5, 2025", title: "$10 African American", img: "find5.jpg" },
-  { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "find6.jpg" },
-  { date: "Aug 8, 2025", title: "Gen-Z Slang Banner", img: "find8.jpg" },
-  { date: "Aug 9, 2025", title: "Pink Escalade", img: "find9.jpg" },
-  { date: "Aug 10, 2025", title: "Fake Croissant w/ Bite Mark", img: "find10.jpg" }
+  { date:"Aug 5,2025", title:"$10 African American", img:"find5.jpg" },
+  { date:"Aug 6,2025", title:"Fortnite Battle Bus", img:"find6.jpg" },
+  { date:"Aug 8,2025", title:"Gen-Z Slang Banner", img:"find8.jpg" },
+  { date:"Aug 9,2025", title:"Pink Escalade", img:"find9.jpg" },
+  { date:"Aug 10,2025", title:"Fake Croissant w/ Bite Mark", img:"find10.jpg" }
 ];
 
 const track = document.getElementById("track");
@@ -84,12 +89,16 @@ const results = document.getElementById("results");
 const chosenTitle = document.getElementById("chosenTitle");
 const chosenImage = document.getElementById("chosenImage");
 
-let index = 0, startX = 0, currentX = 0, dragging = false;
+let index = 0;
+let startX = 0;
+let currentX = 0;
+let dragging = false;
+let slideWidth = 0;
 
 function escapeQuotes(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 function renderCarousel() {
-  track.innerHTML = finds.map(f => `
+  track.innerHTML = finds.map(f=>`
     <div class="slide">
       <div class="card">
         <div class="date">${f.date}</div>
@@ -102,7 +111,7 @@ function renderCarousel() {
 }
 
 function renderGrid() {
-  grid.innerHTML = finds.map(f => `
+  grid.innerHTML = finds.map(f=>`
     <div class="grid-item">
       <div class="date">${f.date}</div>
       <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
@@ -113,7 +122,7 @@ function renderGrid() {
 }
 
 function switchView(view){
-  if(view === 'grid'){
+  if(view==='grid'){
     carouselShell.classList.add("hidden");
     grid.classList.add("show-grid");
     results.classList.add("hidden");
@@ -125,15 +134,15 @@ function switchView(view){
   }
 }
 
-function vote(title, img){
-  localStorage.setItem(VOTE_KEY, JSON.stringify({ title, img }));
+function vote(title,img){
+  localStorage.setItem(VOTE_KEY,JSON.stringify({title,img}));
   showResults();
 }
 
 function showResults(){
   const saved = localStorage.getItem(VOTE_KEY);
   if(!saved) return;
-  const { title, img } = JSON.parse(saved);
+  const {title,img} = JSON.parse(saved);
   chosenTitle.textContent = title;
   chosenImage.src = img;
   carouselShell.classList.add("hidden");
@@ -143,54 +152,32 @@ function showResults(){
 }
 
 /* ===== Carousel logic ===== */
-let slideWidth = 0;
-
-function updateTransform(offsetX = 0){
+function updateTransform(offsetX=0){
   const slide = track.children[index];
   if(!slide) return;
-  const containerWidth = carouselShell.clientWidth;
   slideWidth = slide.offsetWidth;
-  const centerOffset = (containerWidth - slideWidth) / 2;
-  track.style.transition = offsetX === 0 ? "transform 0.28s ease-out" : "none";
+  const containerWidth = carouselShell.clientWidth;
+  const centerOffset = (containerWidth - slideWidth)/2;
+  track.style.transition = offsetX===0?"transform 0.28s ease-out":"none";
   track.style.transform = `translateX(${-index*slideWidth + centerOffset + offsetX}px)`;
 }
 
-function onTouchStart(e){
-  if(!carouselShell || carouselShell.classList.contains("hidden")) return;
-  dragging = true;
-  startX = e.touches[0].clientX;
-  currentX = startX;
-  track.style.transition = "none";
-}
+function onTouchStart(e){ dragging=true; startX=e.touches[0].clientX; currentX=startX; track.style.transition='none'; }
+function onTouchMove(e){ if(!dragging) return; const delta=e.touches[0].clientX-startX; e.preventDefault(); currentX=e.touches[0].clientX; updateTransform(delta); }
+function onTouchEnd(){ if(!dragging) return; dragging=false; const delta=currentX-startX; if(delta>50 && index>0) index--; else if(delta<-50 && index<finds.length-1) index++; updateTransform(0); }
 
-function onTouchMove(e){
-  if(!dragging) return;
-  const delta = e.touches[0].clientX - startX;
-  e.preventDefault();
-  currentX = e.touches[0].clientX;
-  updateTransform(delta);
-}
+/* Arrow navigation */
+function prevSlide(){ if(index>0){ index--; updateTransform(0); } }
+function nextSlide(){ if(index<finds.length-1){ index++; updateTransform(0); } }
 
-function onTouchEnd(){
-  if(!dragging) return;
-  dragging = false;
-  const delta = currentX - startX;
-  if(delta > parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index > 0) index--;
-  else if(delta < -parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index < finds.length - 1) index++;
-  updateTransform(0);
-}
-
-/* ===== INIT ===== */
 (function init(){
   renderCarousel();
   renderGrid();
   switchView("carousel");
-
-  const carouselEl = document.querySelector('.carousel');
-  carouselEl.addEventListener("touchstart", onTouchStart, { passive:false });
-  carouselEl.addEventListener("touchmove", onTouchMove, { passive:false });
+  const carouselEl = document.querySelector('.carousel-shell');
+  carouselEl.addEventListener("touchstart", onTouchStart, {passive:false});
+  carouselEl.addEventListener("touchmove", onTouchMove, {passive:false});
   carouselEl.addEventListener("touchend", onTouchEnd);
-
   window.addEventListener("resize", updateTransform);
 })();
 </script>
