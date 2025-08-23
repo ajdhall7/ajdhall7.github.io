@@ -1,290 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Marketplace Find of the Month</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketplace Find of the Month</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --max-card-width: 520px; }
+  html, body { margin:0; padding:0; font-family:"Poppins",system-ui,-apple-system,Arial,sans-serif; background:#f0f2f5; color:#1c1e21; overflow-x:hidden; }
+  header { background:#1877f2; color:#fff; text-align:center; padding:16px 12px; font-size:20px; font-weight:700; position:sticky; top:0; z-index:10; }
+  .toolbar { display:flex; justify-content:center; gap:10px; padding:10px 12px; }
+  .btn { border:none; background:#1877f2; color:#fff; font-weight:700; padding:10px 16px; border-radius:8px; cursor:pointer; }
 
-  <style>
-    :root {
-      --max-card-width: 520px;
-    }
+  .carousel-shell { width:100vw; overflow:hidden; }
+  .carousel { display:flex; }
+  .track { display:flex; transition:transform 0.3s ease; will-change:transform; }
+  .slide { flex:0 0 100%; flex-shrink:0; display:flex; justify-content:center; align-items:center; padding:10px 0 18px; }
+  .card { width:min(95vw,var(--max-card-width)); background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:14px; text-align:center; }
+  .date { font-size:13px; color:#606770; margin-bottom:8px; }
+  .frame { width:100%; aspect-ratio:1206/1405; border-radius:10px; overflow:hidden; border:1px solid #e4e6eb; background:#fff; }
+  .frame img { width:100%; height:100%; object-fit:contain; display:block; }
+  .title { margin-top:12px; font-size:18px; font-weight:700; }
+  .vote-btn { margin-top:12px; width:100%; border:none; padding:12px 16px; border-radius:10px; cursor:pointer; font-size:15px; font-weight:700; background:#42b72a; color:#fff; }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: "Poppins", system-ui, -apple-system, Arial, sans-serif;
-      background: #f0f2f5;
-      color: #1c1e21;
-      overflow-x: hidden;
-    }
+  .grid { display:none; padding:10px 12px 20px; gap:12px; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+  .grid-item { background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; align-items:center; }
+  .grid-item .date { margin-bottom:6px; font-size:12px; }
+  .grid-item .frame { width:100%; aspect-ratio:1206/1405; border-radius:8px; }
+  .grid-item .title { font-size:14px; margin-top:8px; text-align:center; }
+  .grid-item .vote-btn { margin-top:8px; padding:10px; font-size:14px; }
 
-    header {
-      background: #1877f2;
-      color: #fff;
-      text-align: center;
-      padding: 16px 12px;
-      font-size: 20px;
-      font-weight: 700;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+  .results { display:none; padding:18px 12px 28px; text-align:center; }
+  .results-card { width:min(95vw,var(--max-card-width)); margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:16px; }
+  .results h2 { font-size:18px; color:#1877f2; font-weight:700; margin:0 0 10px; }
+  .results .title { margin:10px 0 14px; }
+  .results .frame { margin:0 auto; }
 
-    .toolbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px 12px;
-    }
-    .btn {
-      border: none;
-      background: #1877f2;
-      color: #fff;
-      font-weight: 700;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    /* ===== Carousel ===== */
-    .carousel-shell {
-      width: 100vw;
-      overflow: hidden;
-    }
-    .carousel {
-      display: flex;
-    }
-    .track {
-      display: flex;
-      transition: transform 0.3s ease;
-      will-change: transform;
-    }
-    .slide {
-      flex: 0 0 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 10px 0 18px;
-    }
-    .card {
-      width: min(95vw, var(--max-card-width));
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      padding: 14px;
-      text-align: center;
-    }
-    .date { font-size: 13px; color: #606770; margin-bottom: 8px; }
-    .frame {
-      width: 100%;
-      aspect-ratio: 1206 / 1405;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid #e4e6eb;
-      background: #fff;
-    }
-    .frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .title { margin-top: 12px; font-size: 18px; font-weight: 700; }
-    .vote-btn {
-      margin-top: 12px;
-      width: 100%;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 700;
-      background: #42b72a;
-      color: #fff;
-    }
-
-    /* ===== Grid View ===== */
-    .grid { display: none; padding: 10px 12px 20px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-    .grid-item {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .grid-item .date { margin-bottom: 6px; font-size: 12px; }
-    .grid-item .frame { width: 100%; aspect-ratio: 1206 / 1405; border-radius: 8px; }
-    .grid-item .title { font-size: 14px; margin-top: 8px; text-align: center; }
-    .grid-item .vote-btn { margin-top: 8px; padding: 10px; font-size: 14px; }
-
-    /* ===== Results ===== */
-    .results { display: none; padding: 18px 12px 28px; text-align: center; }
-    .results-card {
-      width: min(95vw, var(--max-card-width));
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      padding: 16px;
-    }
-    .results h2 { font-size: 18px; color: #1877f2; font-weight: 700; margin: 0 0 10px; }
-    .results .title { margin: 10px 0 14px; }
-    .results .frame { margin: 0 auto; }
-
-    /* Utilities */
-    .hidden { display: none !important; }
-    .show-grid { display: grid; }
-  </style>
+  .hidden { display:none !important; }
+  .show-grid { display:grid; }
+</style>
 </head>
 <body>
-  <header>Facebook Marketplace Find of the Month</header>
-  <div class="toolbar">
-    <button class="btn" onclick="switchView('carousel')">Carousel View</button>
-    <button class="btn" onclick="switchView('grid')">Grid View</button>
+<header>Facebook Marketplace Find of the Month</header>
+<div class="toolbar">
+  <button class="btn" onclick="switchView('carousel')">Carousel View</button>
+  <button class="btn" onclick="switchView('grid')">Grid View</button>
+</div>
+
+<section class="carousel-shell" id="carouselShell">
+  <div class="carousel">
+    <div class="track" id="track"></div>
   </div>
+</section>
 
-  <section class="carousel-shell" id="carouselShell">
-    <div class="carousel">
-      <div class="track" id="track"></div>
+<section class="grid" id="grid"></section>
+
+<section class="results" id="results">
+  <div class="results-card">
+    <h2>Your Facebook Marketplace Find of the Month:</h2>
+    <div class="title" id="chosenTitle"></div>
+    <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
+  </div>
+</section>
+
+<script>
+const VOTE_KEY = "vote_2025_08";
+const finds = [
+  { date:"Aug 5,2025",title:"$10 African American",img:"find5.jpg" },
+  { date:"Aug 6,2025",title:"Fortnite Battle Bus",img:"find6.jpg" },
+  { date:"Aug 8,2025",title:"Gen-Z Slang Banner",img:"find8.jpg" },
+  { date:"Aug 9,2025",title:"Pink Escalade",img:"find9.jpg" },
+  { date:"Aug 10,2025",title:"Fake Croissant w/ Bite Mark",img:"find10.jpg" },
+];
+
+const track = document.getElementById("track");
+const carouselShell = document.getElementById("carouselShell");
+const grid = document.getElementById("grid");
+const results = document.getElementById("results");
+const chosenTitle = document.getElementById("chosenTitle");
+const chosenImage = document.getElementById("chosenImage");
+
+let index=0, startX=0, currentX=0, dragging=false;
+
+function escapeQuotes(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function renderCarousel(){
+  track.innerHTML = finds.map(f => `
+    <div class="slide">
+      <div class="card">
+        <div class="date">${f.date}</div>
+        <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+        <div class="title">${f.title}</div>
+        <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote for this Find</button>
+      </div>
     </div>
-  </section>
+  `).join("");
+}
 
-  <section class="grid" id="grid"></section>
-
-  <section class="results" id="results">
-    <div class="results-card">
-      <h2>Your Facebook Marketplace Find of the Month:</h2>
-      <div class="title" id="chosenTitle"></div>
-      <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
+function renderGrid(){
+  grid.innerHTML = finds.map(f => `
+    <div class="grid-item">
+      <div class="date">${f.date}</div>
+      <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+      <div class="title">${f.title}</div>
+      <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote</button>
     </div>
-  </section>
+  `).join("");
+}
 
-  <script>
-    const VOTE_KEY = "vote_2025_08";
-    const finds = [
-      { date: "Aug 5, 2025", title: "$10 African American", img: "find5.jpg" },
-      { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "find6.jpg" },
-      { date: "Aug 8, 2025", title: "Gen-Z Slang Banner", img: "find8.jpg" },
-      { date: "Aug 9, 2025", title: "Pink Escalade", img: "find9.jpg" },
-      { date: "Aug 10, 2025", title: "Fake Croissant w/ Bite Mark", img: "find10.jpg" },
-      { date: "Aug 11, 2025", title: "Poodle Statue", img: "find11.jpg" },
-      { date: "Aug 12, 2025", title: "Porcelain Duck", img: "find12.jpg" },
-      { date: "Aug 13, 2025", title: "Fish Pizza Oven", img: "find13.jpg" },
-      { date: "Aug 14, 2025", title: "Breastmilk soap bars", img: "find14.jpg" },
-      { date: "Aug 15, 2025", title: "2003 BMW (YN)", img: "find15.jpg" },
-    ];
+function switchView(view){
+  if(view==='grid'){ carouselShell.classList.add('hidden'); grid.classList.add('show-grid'); results.classList.add('hidden'); }
+  else{ grid.classList.remove('show-grid'); results.classList.add('hidden'); carouselShell.classList.remove('hidden'); updateTransform(); }
+}
 
-    const track = document.getElementById("track");
-    const carouselShell = document.getElementById("carouselShell");
-    const grid = document.getElementById("grid");
-    const results = document.getElementById("results");
-    const chosenTitle = document.getElementById("chosenTitle");
-    const chosenImage = document.getElementById("chosenImage");
+function vote(title,img){
+  localStorage.setItem(VOTE_KEY,JSON.stringify({title,img}));
+  showResults();
+}
 
-    let index = 0, startX = 0, currentX = 0, dragging = false;
+function showResults(){
+  const saved = localStorage.getItem(VOTE_KEY);
+  if(!saved) return;
+  const {title,img}=JSON.parse(saved);
+  chosenTitle.textContent=title;
+  chosenImage.src=img;
+  carouselShell.classList.add('hidden');
+  grid.classList.remove('show-grid');
+  grid.classList.add('hidden');
+  results.classList.remove('hidden');
+}
 
-    function escapeQuotes(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+let slideWidth = 0;
+function updateTransform(offsetX=0){
+  if(track.children.length===0) return;
+  track.style.transform = `translateX(${-(index*slideWidth)+offsetX}px)`;
+  track.style.transition = offsetX===0?'transform 0.3s ease':'none';
+}
 
-    function renderCarousel(){
-      track.innerHTML = finds.map(f => `
-        <div class="slide">
-          <div class="card">
-            <div class="date">${f.date}</div>
-            <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-            <div class="title">${f.title}</div>
-            <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote for this Find</button>
-          </div>
-        </div>
-      `).join("");
-      updateTransform();
-    }
+function onTouchStart(e){ dragging=true; startX=e.touches[0].clientX; currentX=startX; track.style.transition='none'; }
+function onTouchMove(e){ if(!dragging) return; const delta = e.touches[0].clientX-startX; e.preventDefault(); currentX=e.touches[0].clientX; updateTransform(delta); }
+function onTouchEnd(){ if(!dragging) return; dragging=false; const delta=currentX-startX; if(delta>slideWidth/4 && index>0) index--; else if(delta<-slideWidth/4 && index<track.children.length-1) index++; updateTransform(0); }
 
-    function renderGrid(){
-      grid.innerHTML = finds.map(f => `
-        <div class="grid-item">
-          <div class="date">${f.date}</div>
-          <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-          <div class="title">${f.title}</div>
-          <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote</button>
-        </div>
-      `).join("");
-    }
+function initCarousel(){
+  renderCarousel();
+  renderGrid();
+  const imgs = track.querySelectorAll('img');
+  let loadedCount=0;
+  imgs.forEach(img=>{ img.onload=()=>{ loadedCount++; if(loadedCount===imgs.length){ slideWidth=track.children[0].getBoundingClientRect().width; updateTransform(); } }; });
+}
 
-    function switchView(view){
-      if(view==='grid'){
-        carouselShell.classList.add('hidden');
-        grid.classList.add('show-grid');
-        results.classList.add('hidden');
-      } else {
-        grid.classList.remove('show-grid');
-        results.classList.add('hidden');
-        carouselShell.classList.remove('hidden');
-        updateTransform();
-      }
-    }
-
-    function vote(title,img){
-      localStorage.setItem(VOTE_KEY, JSON.stringify({title,img}));
-      showResults();
-    }
-
-    function showResults(){
-      const saved = localStorage.getItem(VOTE_KEY);
-      if(!saved) return;
-      const {title,img} = JSON.parse(saved);
-      chosenTitle.textContent = title;
-      chosenImage.src = img;
-
-      carouselShell.classList.add('hidden');
-      grid.classList.remove('show-grid');
-      grid.classList.add('hidden');
-      results.classList.remove('hidden');
-    }
-
-    function updateTransform(offsetX=0){
-      const slide = track.children[0];
-      if(!slide) return;
-      const slideWidth = slide.getBoundingClientRect().width;
-      track.style.transform = `translateX(${-(index*slideWidth)+offsetX}px)`;
-      track.style.transition = offsetX===0 ? 'transform 0.3s ease' : 'none';
-    }
-
-    function onTouchStart(e){
-      dragging = true;
-      startX = e.touches[0].clientX;
-      currentX = startX;
-      track.style.transition = 'none';
-    }
-
-    function onTouchMove(e){
-      if(!dragging) return;
-      const delta = e.touches[0].clientX - startX;
-      e.preventDefault();
-      updateTransform(delta);
-      currentX = e.touches[0].clientX;
-    }
-
-    function onTouchEnd(){
-      if(!dragging) return;
-      dragging = false;
-      const delta = currentX - startX;
-      const slideWidth = track.children[0].getBoundingClientRect().width;
-      if(delta > slideWidth/4 && index>0) index--;
-      else if(delta < -slideWidth/4 && index<track.children.length-1) index++;
-      updateTransform(0);
-    }
-
-    (function init(){
-      renderCarousel();
-      renderGrid();
-      if(localStorage.getItem(VOTE_KEY)) showResults();
-      else switchView('carousel');
-
-      const carouselEl = document.querySelector('.carousel');
-      carouselEl.addEventListener('touchstart', onTouchStart,{passive:false});
-      carouselEl.addEventListener('touchmove', onTouchMove,{passive:false});
-      carouselEl.addEventListener('touchend', onTouchEnd);
-      window.addEventListener('resize', ()=>updateTransform(0));
-    })();
-  </script>
+(function init(){
+  initCarousel();
+  if(localStorage.getItem(VOTE_KEY)) showResults();
+  else switchView('carousel');
+  const carouselEl = document.querySelector('.carousel');
+  carouselEl.addEventListener('touchstart',onTouchStart,{passive:false});
+  carouselEl.addEventListener('touchmove',onTouchMove,{passive:false});
+  carouselEl.addEventListener('touchend',onTouchEnd);
+  window.addEventListener('resize',()=>{ if(track.children.length>0){ slideWidth=track.children[0].getBoundingClientRect().width; updateTransform(0); } });
+})();
+</script>
 </body>
 </html>
