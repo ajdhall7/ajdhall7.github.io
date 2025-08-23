@@ -63,7 +63,12 @@
     .carousel {
       width: 100vw;
       overflow: hidden;                 /* Track slides; we manage movement via transform */
-      display: block;
+      display: flex;
+    }
+    .carousel-item {
+      display: flex;
+      justify-content: center; /* Horizontally center */
+      align-items: center;    /* Vertically center */
     }
     .track {
       display: flex;
