@@ -1,425 +1,204 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Marketplace Find of the Month</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketplace Find of the Month</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --max-card-width: 520px; --swipe-threshold:50px; }
+  html, body { margin:0; padding:0; font-family:"Poppins", system-ui, -apple-system, Arial, sans-serif; background:#f0f2f5; color:#1c1e21; overflow-x:hidden; }
+  header { background:#1877f2; color:#fff; text-align:center; padding:16px 12px; font-size:20px; font-weight:700; position:sticky; top:0; z-index:10; }
+  .toolbar { display:flex; justify-content:center; gap:10px; padding:10px 12px; }
+  .btn { border:none; background:#1877f2; color:#fff; font-weight:700; padding:10px 16px; border-radius:8px; cursor:
 
-  <!-- Poppins font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+  /* Carousel container */
+  .carousel-shell { width:100vw; position:relative; overflow:hidden; display:flex; align-items:center; }
+  .track { display:flex; transition:transform 0.3s ease; will-change:transform; }
+  .slide { flex:0 0 auto; display:flex; justify-content:center; align-items:center; width:80vw; padding:10px 0; }
+  .card { width:min(95%, var(--max-card-width)); background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:14px; text-align:center; }
 
-  <style>
-    :root{
-      --max-card-width: 520px;         /* Max content width for the portrait frame on mobile */
-      --swipe-threshold: 50px;         /* Slide threshold in px */
-    }
+  .frame { width:100%; aspect-ratio:1206/1405; border-radius:10px; overflow:hidden; border:1px solid #e4e6eb; background:#fff; }
+  .frame img { width:100%; height:100%; object-fit:contain; display:block; }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: "Poppins", system-ui, -apple-system, Arial, sans-serif;
-      background: #f0f2f5;
-      color: #1c1e21;
-      overflow-x: hidden;
-    }
+  .date { font-size:13px; color:#606770; margin-bottom:8px; }
+  .title { margin-top:12px; font-size:18px; font-weight:700; }
+  .vote-btn { margin-top:12px; width:100%; border:none; padding:12px 16px; border-radius:10px; cursor:pointer; font-size:15px; font-weight:700; background:#42b72a; color:#fff; }
 
-    header {
-      background: #1877f2;
-      color: #fff;
-      text-align: center;
-      padding: 20px 12px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .header-line { font-size: 22px; font-weight: 700; line-height: 1.2; }
-    .header-line.sub { font-size: 18px; font-weight: 500; margin-top: 4px; }
+  /* Grid view */
+  .grid { display:none; padding:10px 12px 20px; gap:12px; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+  .grid-item { background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:10px; display:flex; flex-direction:column; align-items:center; }
+  .grid-item .date { margin-bottom:6px; font-size:12px; }
+  .grid-item .frame { width:100%; aspect-ratio:1206/1405; border-radius:8px; }
+  .grid-item .title { font-size:14px; margin-top:8px; text-align:center; }
+  .grid-item .vote-btn { margin-top:8px; padding:10px; font-size:14px; }
 
-    .toolbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px 12px;
-    }
-    .btn {
-      border: none;
-      background: #1877f2;
-      color: #fff;
-      font-weight: 700;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+  /* Results view */
+  .results { display:none; padding:18px 12px 28px; text-align:center; }
+  .results-card { width:min(95%, var(--max-card-width)); margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 6px 14px rgba(0,0,0,0.12); padding:16px; }
+  .results h2 { font-size:18px; color:#1877f2; font-weight:700; margin:0 0 10px; }
+  .results .title { margin:10px 0 14px; }
+  .results .frame { margin:0 auto; }
 
-    /* ===== Carousel ===== */
-    .carousel-shell {
-      width: 100vw;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-    }
-    .track {
-      display: flex;
-      transition: transform 0.3s ease;
-      will-change: transform;
-    }
-    .slide {
-      flex: 0 0 auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 80vw;               /* Slightly smaller than viewport to avoid spill */
-      padding: 10px 0;
-    }
-    .card {
-      width: min(95%, var(--max-card-width));
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      padding: 14px;
-      text-align: center;
-    }
+  .hidden { display:none !important; }
+  .show-grid { display:grid; }
 
-    .frame {
-      width: 100%;
-      aspect-ratio: 1206 / 1405; /* keep the 1206x1405 spot */
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid #e4e6eb;
-      background: #fff;
-    }
-    .frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .date { font-size: 13px; color: #606770; margin-bottom: 8px; }
-    .title { margin-top: 12px; font-size: 18px; font-weight: 700; }
-    .vote-btn {
-      margin-top: 12px;
-      width: 100%;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 700;
-      background: #42b72a;
-      color: #fff;
-    }
-
-    /* ===== Grid View ===== */
-    .grid {
-      display: none;
-      padding: 10px 12px 20px;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
-    .grid-item {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .grid-item .date { margin-bottom: 6px; font-size: 12px; }
-    .grid-item .frame { width: 100%; aspect-ratio: 1206 / 1405; border-radius: 8px; }
-    .grid-item .title { font-size: 14px; margin-top: 8px; text-align: center; }
-    .grid-item .vote-btn { margin-top: 8px; padding: 10px; font-size: 14px; }
-
-    /* ===== Results View (Winner) ===== */
-    .results {
-      display: none;
-      padding: 18px 12px 28px;
-      text-align: center;
-    }
-    .results-card {
-      width: min(95%, var(--max-card-width));
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-      padding: 16px;
-    }
-    .results h2 { font-size: 20px; color: #1877f2; font-weight: 700; margin: 0 0 12px; }
-    .results .winner-date { font-size: 13px; color: #606770; margin-bottom: 8px; }
-    .results .title { margin: 10px 0 14px; }
-    .results .frame { margin: 0 auto; }
-
-    /* Utilities */
-    .hidden { display: none !important; }
-    .show-grid { display: grid; }
-
-    /* Navigation arrows */
-    .arrow {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.3);
-      border: none;
-      color: #fff;
-      font-size: 2rem;
-      width: 40px;
-      height: 60px;
-      cursor: pointer;
-      border-radius: 6px;
-      z-index: 5;
-    }
-    .arrow.left { left: 10px; }
-    .arrow.right { right: 10px; }
-  </style>
+  /* Navigation arrows */
+  .arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.3); border:none; color:white; font-size:2rem; width:40px; height:60px; cursor:pointer; border-radius:6px; z-index:5; }
+  .arrow.left { left:10px; }
+  .arrow.right { right:10px; }
+</style>
 </head>
 <body>
   <header>
-    <div class="header-line">Facebook Marketplace</div>
-    <div class="header-line sub">Find of the Month</div>
-  </header>
+  <div class="header-line">Facebook Marketplace</div>
+  <div class="header-line sub">Find of the Month</div>
+</header>
+<div class="toolbar">
+  <button class="btn" onclick="switchView('carousel')">Carousel View</button>
+  <button class="btn" onclick="switchView('grid')">Grid View</button>
+</div>
 
-  <div class="toolbar" id="toolbar">
-    <button class="btn" onclick="switchView('carousel')">Carousel View</button>
-    <button class="btn" onclick="switchView('grid')">Grid View</button>
+<section class="carousel-shell" id="carouselShell">
+  <button class="arrow left" onclick="prevSlide()">‹</button>
+  <div class="track" id="track"></div>
+  <button class="arrow right" onclick="nextSlide()">›</button>
+</section>
+
+<section class="grid" id="grid"></section>
+
+<section class="results" id="results">
+  <div class="results-card">
+    <h2>Your Facebook Marketplace Find of the Month:</h2>
+    <div class="title" id="chosenTitle"></div>
+    <div class="frame"><img id="chosenImage" alt="Selected Find"></div>
   </div>
+</section>
+}
 
-  <!-- Carousel -->
-  <section class="carousel-shell" id="carouselShell">
-    <button class="arrow left" onclick="prevSlide()">‹</button>
-    <div class="track" id="track"></div>
-    <button class="arrow right" onclick="nextSlide()">›</button>
-  </section>
+<script>
+const VOTE_KEY = "vote_2025_08";
+const finds = [
+  { date: "Aug 5, 2025", title: "$10 African American", img: "IMG_4727.jpeg" },
+  { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "IMG_4731.png" },
+  { date: "Aug 8, 2025", title: "Gen-Z Slang Banner", img: "IMG_4748.jpeg" },
+  { date: "Aug 9, 2025", title: "Pink Escalade", img: "IMG_4751.jpeg" },
+  { date: "Aug 10, 2025", title: "Fake Croissant w/ Bite Mark", img: "IMG_4763.jpeg" },
+  { date: "Aug 11, 2025", title: "Poodle Statue", img: "IMG_4799.jpeg" },
+  { date: "Aug 12, 2025", title: "Porcelain Duck", img: "IMG_4801.jpeg" },
+  { date: "Aug 13, 2025", title: "Fish Pizza Oven", img: "IMG_4811.jpeg" },
+  { date: "Aug 14, 2025", title: "Breastmilk soap bars", img: "IMG_4812.jpeg" },
+  { date: "Aug 15, 2025", title: "2003 BMW (YN)", img: "IMG_4867.jpeg" },
+  { date: "Aug 16, 2025", title: "Tiger (ON SALE)", img: "IMG_4892.jpeg" },
+  { date: "Aug 17, 2025", title: "Taco Bell Dog", img: "IMG_4893.jpeg" },
+  { date: "Aug 18, 2025", title: "LeBron Barbie", img: "IMG_4900.jpeg" },
+  { date: "Aug 19, 2025", title: "Biggest Dinosaur Eva", img: "IMG_4921.jpeg" },
+  { date: "Aug 20, 2025", title: "2021 GMC (Hippo)", img: "IMG_4922.jpeg" },
+  { date: "Aug 21, 2025", title: "Fake Blueberry Pie", img: "IMG_4986.jpeg" },
+  { date: "Aug 22, 2025", title: "New Hamburger Buns", img: "IMG_4989.jpeg" },
+  { date: "Aug 23, 2025", title: "Mosquito Head Cover", img: "IMG_4992.jpeg" },
+];
 
-  <!-- Grid -->
-  <section class="grid" id="grid"></section>
+const track = document.getElementById("track");
+const carouselShell = document.getElementById("carouselShell");
+const grid = document.getElementById("grid");
+const results = document.getElementById("results");
+const chosenTitle = document.getElementById("chosenTitle");
+const chosenImage = document.getElementById("chosenImage");
 
-  <!-- Results (Winner) -->
-  <section class="results" id="results">
-    <div class="results-card">
-      <h2>Your Marketplace FOTM:</h2>
-      <div class="winner-date" id="chosenDate"></div>
-      <div class="title" id="chosenTitle"></div>
-      <div class="frame">
-        <img id="chosenImage" alt="Selected Find">
+let index = 0;
+let startX = 0;
+let currentX = 0;
+let dragging = false;
+let slideWidth = 0;
+
+function escapeQuotes(s){ return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function renderCarousel() {
+  track.innerHTML = finds.map(f=>`
+    <div class="slide">
+      <div class="card">
+        <div class="date">${f.date}</div>
+        <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+        <div class="title">${f.title}</div>
+        <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote for this Find</button>
       </div>
     </div>
-  </section>
+  `).join("");
+}
 
-  <!-- Confetti (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+function renderGrid() {
+  grid.innerHTML = finds.map(f=>`
+    <div class="grid-item">
+      <div class="date">${f.date}</div>
+      <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+      <div class="title">${f.title}</div>
+      <button class="vote-btn" onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}')">Vote</button>
+    </div>
+  `).join("");
+}
 
-  <script>
-    const VOTE_KEY = "vote_2025_08";
+function switchView(view){
+  if(view==='grid'){
+    carouselShell.classList.add("hidden");
+    grid.classList.add("show-grid");
+    results.classList.add("hidden");
+  } else {
+    grid.classList.remove("show-grid");
+    results.classList.add("hidden");
+    carouselShell.classList.remove("hidden");
+    updateTransform();
+  }
+}
 
-    const finds = [
-      { date: "Aug 5, 2025",  title: "$10 African American",          img: "IMG_4727.jpeg" },
-      { date: "Aug 6, 2025",  title: "Fortnite Battle Bus",           img: "IMG_4731.png"  },
-      { date: "Aug 8, 2025",  title: "Gen-Z Slang Banner",            img: "IMG_4748.jpeg" },
-      { date: "Aug 9, 2025",  title: "Pink Escalade",                 img: "IMG_4751.jpeg" },
-      { date: "Aug 10, 2025", title: "Fake Croissant w/ Bite Mark",   img: "IMG_4763.jpeg" },
-      { date: "Aug 11, 2025", title: "Poodle Statue",                 img: "IMG_4799.jpeg" },
-      { date: "Aug 12, 2025", title: "Porcelain Duck",                img: "IMG_4801.jpeg" },
-      { date: "Aug 13, 2025", title: "Fish Pizza Oven",               img: "IMG_4811.jpeg" },
-      { date: "Aug 14, 2025", title: "Breastmilk soap bars",          img: "IMG_4812.jpeg" },
-      { date: "Aug 15, 2025", title: "2003 BMW (YN)",                 img: "IMG_4867.jpeg" },
-      { date: "Aug 16, 2025", title: "Tiger (ON SALE)",               img: "IMG_4892.jpeg" },
-      { date: "Aug 17, 2025", title: "Taco Bell Dog",                 img: "IMG_4893.jpeg" },
-      { date: "Aug 18, 2025", title: "LeBron Barbie",                 img: "IMG_4900.jpeg" },
-      { date: "Aug 19, 2025", title: "Biggest Dinosaur Eva",          img: "IMG_4921.jpeg" },
-      { date: "Aug 20, 2025", title: "2021 GMC (Hippo)",              img: "IMG_4922.jpeg" },
-      { date: "Aug 21, 2025", title: "Fake Blueberry Pie",            img: "IMG_4986.jpeg" },
-      { date: "Aug 22, 2025", title: "New Hamburger Buns",            img: "IMG_4989.jpeg" },
-      { date: "Aug 23, 2025", title: "Mosquito Head Cover",           img: "IMG_4992.jpeg" }
-    ];
+function vote(title,img){
+  localStorage.setItem(VOTE_KEY,JSON.stringify({title,img}));
+  showResults();
+}
 
-    /* Elements */
-    const track        = document.getElementById("track");
-    const carouselShell= document.getElementById("carouselShell");
-    const toolbar      = document.getElementById("toolbar");
-    const grid         = document.getElementById("grid");
-    const results      = document.getElementById("results");
-    const chosenTitle  = document.getElementById("chosenTitle");
-    const chosenImage  = document.getElementById("chosenImage");
-    const chosenDate   = document.getElementById("chosenDate");
+function showResults(){
+  const saved = localStorage.getItem(VOTE_KEY);
+  if(!saved) return;
+  const {title,img} = JSON.parse(saved);
+  chosenTitle.textContent = title;
+  chosenImage.src = img;
+  carouselShell.classList.add("hidden");
+  grid.classList.remove("show-grid");
+  grid.classList.add("hidden");
+  results.classList.remove("hidden");
+}
 
-    /* State */
-    let index = 0;
-    let startX = 0, currentX = 0, dragging = false;
-    let slideWidth = 0;
+/* ===== Carousel logic ===== */
+function updateTransform(offsetX=0){
+  const slide = track.children[index];
+  if(!slide) return;
+  slideWidth = slide.offsetWidth;
+  const containerWidth = carouselShell.clientWidth;
+  const centerOffset = (containerWidth - slideWidth)/2;
+  track.style.transition = offsetX===0?"transform 0.28s ease-out":"none";
+  track.style.transform = `translateX(${-index*slideWidth + centerOffset + offsetX}px)`;
+}
 
-    /* Helpers */
-    function escapeQuotes(s){
-      return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
+function onTouchStart(e){ dragging=true; startX=e.touches[0].clientX; currentX=startX; track.style.transition='none'; }
+function onTouchMove(e){ if(!dragging) return; const delta=e.touches[0].clientX-startX; e.preventDefault(); currentX=e.touches[0].clientX; updateTransform(delta); }
+function onTouchEnd(){ if(!dragging) return; dragging=false; const delta=currentX-startX; if(delta>50 && index>0) index--; else if(delta<-50 && index<finds.length-1) index++; updateTransform(0); }
 
-    /* Rendering */
-    function renderCarousel() {
-      track.innerHTML = finds.map(f => `
-        <div class="slide">
-          <div class="card">
-            <div class="date">${f.date}</div>
-            <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-            <div class="title">${f.title}</div>
-            <button class="vote-btn"
-              onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
-              Vote for this Find
-            </button>
-          </div>
-        </div>
-      `).join("");
-      // keep alignment after render
-      updateTransform(0);
-    }
+/* Arrow navigation */
+function prevSlide(){ if(index>0){ index--; updateTransform(0); } }
+function nextSlide(){ if(index<finds.length-1){ index++; updateTransform(0); } }
 
-    function renderGrid() {
-      grid.innerHTML = finds.map(f => `
-        <div class="grid-item">
-          <div class="date">${f.date}</div>
-          <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-          <div class="title">${f.title}</div>
-          <button class="vote-btn"
-            onclick="vote('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
-            Vote
-          </button>
-        </div>
-      `).join("");
-    }
-
-    /* View toggle */
-    function switchView(view){
-      if (view === "grid"){
-        carouselShell.classList.add("hidden");
-        grid.classList.add("show-grid");
-        results.classList.add("hidden");
-      } else {
-        grid.classList.remove("show-grid");
-        results.classList.add("hidden");
-        carouselShell.classList.remove("hidden");
-        updateTransform(); // keep slide position correct
-      }
-    }
-
-    /* Voting (persist + show only winner) */
-    function vote(title, img, date){
-      localStorage.setItem(VOTE_KEY, JSON.stringify({ title, img, date }));
-      showResults(true); // true -> fire confetti on first set
-    }
-
-    function showResults(fire = false){
-      const saved = localStorage.getItem(VOTE_KEY);
-      if (!saved) return;
-      const { title, img, date } = JSON.parse(saved);
-
-      // Fill winner card
-      chosenTitle.textContent = title || "";
-      chosenImage.src = img || "";
-      chosenDate.textContent = date || "";
-
-      // Hide every other part of the UI so only the winner shows
-      carouselShell.classList.add("hidden");
-      grid.classList.remove("show-grid");
-      grid.classList.add("hidden");
-      results.classList.remove("hidden");
-
-      // Hide toolbar to make the change "permanent" for this browser
-      toolbar.classList.add("hidden");
-
-      if (fire) celebrate();
-    }
-
-    /* Confetti celebration */
-    function celebrate(){
-      // One-second burst “rain”
-      const duration = 1500;
-      const end = Date.now() + duration;
-
-      (function frame() {
-        confetti({
-          particleCount: 6,
-          startVelocity: 22,
-          spread: 80,
-          origin: { x: Math.random(), y: 0 }
-        });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-
-      // Final big pop
-      setTimeout(() => {
-        confetti({ particleCount: 120, spread: 70, origin: { y: 0.3 } });
-      }, duration);
-    }
-
-    /* ===== Carousel logic (centered slide) ===== */
-    function updateTransform(offsetX = 0){
-      const slide = track.children[index];
-      if (!slide) return;
-      slideWidth = slide.offsetWidth;
-      const containerWidth = carouselShell.clientWidth;
-      const centerOffset = (containerWidth - slideWidth) / 2;
-      track.style.transition = offsetX === 0 ? "transform 0.28s ease-out" : "none";
-      track.style.transform = `translateX(${-index * slideWidth + centerOffset + offsetX}px)`;
-    }
-
-    function onTouchStart(e){
-      dragging = true;
-      startX = e.touches[0].clientX;
-      currentX = startX;
-      track.style.transition = "none";
-    }
-    function onTouchMove(e){
-      if (!dragging) return;
-      const x = e.touches[0].clientX;
-      const delta = x - startX;
-      if (Math.abs(delta) > 5) e.preventDefault();
-      updateTransform(delta);
-      currentX = x;
-    }
-    function onTouchEnd(){
-      if (!dragging) return;
-      dragging = false;
-      const delta = currentX - startX;
-      if (delta > parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index > 0){
-        index--;
-      } else if (delta < -parseInt(getComputedStyle(document.documentElement).getPropertyValue('--swipe-threshold')) && index < finds.length - 1){
-        index++;
-      }
-      updateTransform(0);
-    }
-
-    /* Arrow navigation */
-    function prevSlide(){ if (index > 0){ index--; updateTransform(0); } }
-    function nextSlide(){ if (index < finds.length - 1){ index++; updateTransform(0); } }
-
-    /* Expose arrow fns to inline handlers */
-    window.prevSlide = prevSlide;
-    window.nextSlide = nextSlide;
-    window.vote      = vote;
-    window.switchView= switchView;
-
-    /* ===== INIT ===== */
-    (function init(){
-      // If already voted, go straight to winner view (persisted)
-      if (localStorage.getItem(VOTE_KEY)) {
-        renderCarousel();
-        renderGrid();
-        showResults(false);
-      } else {
-        renderCarousel();
-        renderGrid();
-        switchView("carousel");
-      }
-
-      // Touch events for swipe
-      const carouselEl = document.querySelector('.carousel-shell');
-      carouselEl.addEventListener("touchstart", onTouchStart, { passive: false });
-      carouselEl.addEventListener("touchmove", onTouchMove,   { passive: false });
-      carouselEl.addEventListener("touchend",  onTouchEnd,    { passive: true  });
-
-      // Keep centered on resize
-      window.addEventListener("resize", () => updateTransform(0));
-    })();
-  </script>
+(function init(){
+  renderCarousel();
+  renderGrid();
+  switchView("carousel");
+  const carouselEl = document.querySelector('.carousel-shell');
+  carouselEl.addEventListener("touchstart", onTouchStart, {passive:false});
+  carouselEl.addEventListener("touchmove", onTouchMove, {passive:false});
+  carouselEl.addEventListener("touchend", onTouchEnd);
+  window.addEventListener("resize", updateTransform);
+})();
+</script>
 </body>
 </html>
