@@ -110,22 +110,20 @@
       background: #42b72a;
       color: #fff;
     }
-    .cat-btn {
-      margin: 4px 2px 0 2px;
-      padding: 8px 10px;
-      font-size: 13px;
+  
+    .cat-dropdown {
+      margin-top: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 15px;
       font-weight: 700;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #f0f2f5;
+      background: #ffc107; /* gold color */
       color: #1c1e21;
+      border: none;
+      cursor: pointer;
+      text-align: left;
     }
-    .cat-btn.voted {
-      background: #1877f2;
-      color: #fff;
-    }
-
     /* ===== Grid View ===== */
     .grid {
       display: none;
@@ -301,22 +299,22 @@
       renderNominations();
     }
 
-    function toggleCategoryVote(img, category) {
-      if (!categoryVotes[img]) categoryVotes[img] = [];
+ function toggleCategoryVote(img, category) {
+  if (!categoryVotes[img]) categoryVotes[img] = [];
 
-      const index = categoryVotes[img].indexOf(category);
-      if (index > -1) {
-        categoryVotes[img].splice(index, 1); // remove vote
-      } else {
-        categoryVotes[img].push(category); // add vote
-      }
+  // Remove any existing category
+  categoryVotes[img] = [];
 
-      localStorage.setItem(CATEGORY_KEY, JSON.stringify(categoryVotes));
-      renderCarousel();
-      renderGrid();
-      renderNominations();
-    }
+  // Only add if a real category is selected
+  if (category) {
+    categoryVotes[img].push(category);
+  }
 
+  localStorage.setItem(CATEGORY_KEY, JSON.stringify(categoryVotes));
+  renderCarousel();
+  renderGrid();
+  renderNominations();
+}
     function renderCarousel() {
       track.innerHTML = finds.map(f => `
         <div class="slide">
@@ -328,13 +326,13 @@
               onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
               ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
             </button>
-            <div class="category-votes">
+          <div class="category-votes">
+            <select class="cat-dropdown" onchange="toggleCategoryVote('${f.img}', this.value)">
+              <option value="">Superlative Nomination</option>
               ${specialCategories.map(cat => `
-                <button class="cat-btn ${categoryVotes[f.img]?.includes(cat) ? "voted" : ""}"
-                  onclick="toggleCategoryVote('${f.img}','${cat}')">
-                  ${cat}
-                </button>
+                <option value="${cat}" ${categoryVotes[f.img]?.includes(cat) ? "selected" : ""}>${cat}</option>
               `).join("")}
+             </select>
             </div>
           </div>
         </div>
@@ -365,7 +363,7 @@
     }
     function renderNominations() {
   list.innerHTML = `
-    <h2>Your Nominations (${nominations.length}/5)</h2>
+    <h2>Your Nominations (${nominations.length}/10)</h2>
     <ul>
       ${nominations.map(n => {
         // Get categories voted for this item
