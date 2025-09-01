@@ -294,12 +294,12 @@
     }
 
     function renderNominations() {
-      list.innerHTML = `
-        <h2>Your Nominations (${nominations.length}/10)</h2>
-        <ul>
-          ${nominations.map(n => `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
-        </ul>
-        <button id="shareBtn">Share via SMS</button>
+  list.innerHTML = `
+    <h2>Your Nominations (${nominations.length}/10)</h2>
+    <ul>
+      ${nominations.map(n => `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
+    </ul>
+    <button id="shareBtn" class="btn" style="margin-top:12px;">Share via SMS</button
       `;
 
       // Attach the share handler after the button exists in the DOM
