@@ -300,16 +300,16 @@
     }
 
  function toggleCategoryVote(img, category) {
-  if (!categoryVotes[img]) categoryVotes[img] = [];
+  // Remove any existing category from this find
+  categoryVotes[img] = "";
 
-  // Remove any existing category
-  categoryVotes[img] = [];
-
-  // Only add if a real category is selected
-  if (category) {
-    categoryVotes[img].push(category);
+  // Check if the category is already used by another find
+  if (category && Object.values(categoryVotes).includes(category)) {
+    alert(`"${category}" is already used for another find!`);
+    return;
   }
 
+  if (category) categoryVotes[img] = category;
   localStorage.setItem(CATEGORY_KEY, JSON.stringify(categoryVotes));
   renderCarousel();
   renderGrid();
@@ -350,14 +350,14 @@
         onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
         ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
       </button>
-      <div class="category-votes">
-        ${specialCategories.map(cat => `
-          <button class="cat-btn ${categoryVotes[f.img]?.includes(cat) ? "voted" : ""}"
-            onclick="toggleCategoryVote('${f.img}','${cat}')">
-            ${cat}
-          </button>
-        `).join("")}
-      </div>
+    <div class="category-votes">
+       <select class="cat-dropdown" onchange="toggleCategoryVote('${f.img}', this.value)">
+         <option value="">Superlative Nomination</option>
+         ${specialCategories.map(cat => `
+           <option value="${cat}" ${categoryVotes[f.img] === cat ? "selected" : ""}>${cat}</option>
+         `).join('')}
+       </select>
+     </div>
     </div>
   `).join("");
     }
@@ -366,16 +366,14 @@
     <h2>Your Nominations (${nominations.length}/10)</h2>
     <ul>
       ${nominations.map(n => {
-        // Get categories voted for this item
-        const cats = categoryVotes[n.img] || [];
-        const catText = cats.length ? ` — Categories: ${cats.join(", ")}` : "";
+        const cat = categoryVotes[n.img] || "";
+        const catText = cat ? ` — Superlative: ${cat}` : "";
         return `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date}${catText})</span></li>`;
       }).join("")}
     </ul>
     <button id="shareBtn">Share via SMS</button>
   `;
 
-  // Attach the share handler after the button exists in the DOM
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) {
     shareBtn.onclick = () => {
@@ -386,15 +384,12 @@
 
       let message = "Here are my nominations:\n\n";
       nominations.forEach((item, i) => {
-        const cats = categoryVotes[item.img] || [];
-        const catText = cats.length ? ` — Categories: ${cats.join(", ")}` : "";
+        const cat = categoryVotes[item.img] || "";
+        const catText = cat ? ` — Superlative: ${cat}` : "";
         message += `${i + 1}. ${item.title} (${item.date}${catText})\n`;
       });
 
-      // Encode for SMS
       const smsBody = encodeURIComponent(message);
-
-      // Opens SMS app with pre-filled message
       window.location.href = `sms:?&body=${smsBody}`;
     };
   }
