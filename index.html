@@ -343,9 +343,23 @@
     }
 
     function renderGrid() {
-      grid.innerHTML = finds.map(f => `
-        <div class="grid-item">
-          <div class="date">${f.date}</div>
-          <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-          <div class="title">${f.title}</div>
-          <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff
+  grid.innerHTML = finds.map(f => `
+    <div class="grid-item">
+      <div class="date">${f.date}</div>
+      <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+      <div class="title">${f.title}</div>
+      <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff6961" : "#42b72a"}"
+        onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
+        ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
+      </button>
+      <div class="category-votes">
+        ${specialCategories.map(cat => `
+          <button class="cat-btn ${categoryVotes[f.img]?.includes(cat) ? "voted" : ""}"
+            onclick="toggleCategoryVote('${f.img}','${cat}')">
+            ${cat}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+    }
