@@ -298,9 +298,26 @@
         <ul>
           ${nominations.map(n => `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
         </ul>
+        <button id="shareBtn">Share via SMS</button>
       `;
     }
+document.getElementById("shareBtn").onclick = () => {
+  if (nominations.length === 0) {
+    alert("No nominations yet!");
+    return;
+  }
 
+  let message = "Here are my nominations:\n\n";
+  nominations.forEach((item, i) => {
+    message += `${i + 1}. ${item.title} (${item.date})\n`;
+  });
+
+  // Encode for SMS
+  const smsBody = encodeURIComponent(message);
+
+  // Opens SMS app with pre-filled message
+  window.location.href = `sms:?&body=${smsBody}`;
+};
     /* ===== Carousel logic ===== */
     let index = 0, startX = 0, currentX = 0, dragging = false, slideWidth = 0;
     const carouselShell= document.getElementById("carouselShell");
