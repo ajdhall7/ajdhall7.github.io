@@ -241,8 +241,8 @@
 
     const finds = [
       { date: "Aug 5, 2025", title: "$10 African American", img: "IMG_4727.jpeg" },
-      { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "IMG_4731.jpeg" },
-      { date: "Aug 8, 2025", title: "Gen-Z Slang Banner", img: "IMG_4748.jpeg" },
+      { date: "Aug 6, 2025", title: "Fortnite Battle Bus", img: "IMG_4731.png" },
+      { date: "Aug 8, 2025", title: "Gen-Z Slang Banner", img: "IMG_4748.png" },
       { date: "Aug 9, 2025", title: "Pink Escalade", img: "IMG_4763.jpeg" },
       { date: "Aug 10, 2025", title: "Fake Croissant w/ Bite Mark", img: "IMG_4751.jpeg" },
       { date: "Aug 11, 2025", title: "Poodle Statue", img: "IMG_4801.jpeg" },
@@ -299,45 +299,46 @@
       renderNominations();
     }
 
- function selectSuperlative(img, cat) {
-  // Remove this superlative from any other item
-  for (const key in categoryVotes) {
-    if (categoryVotes[key] === cat && key !== img) {
-      categoryVotes[key] = null;
-    }
+ function toggleCategoryVote(img, category) {
+  if (!categoryVotes[img]) categoryVotes[img] = [];
+
+  // Remove any existing category
+  categoryVotes[img] = [];
+
+  // Only add if a real category is selected
+  if (category) {
+    categoryVotes[img].push(category);
   }
 
-  categoryVotes[img] = cat;
   localStorage.setItem(CATEGORY_KEY, JSON.stringify(categoryVotes));
   renderCarousel();
   renderGrid();
   renderNominations();
 }
     function renderCarousel() {
-  track.innerHTML = finds.map(f => {
-    const used = Object.values(categoryVotes).filter(val => val && val !== categoryVotes[f.img]);
-    const availableCats = specialCategories.filter(cat => !used.includes(cat));
-    
-    return `
-      <div class="slide">
-        <div class="card">
-          <div class="date">${f.date}</div>
-          <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
-          <div class="title">${f.title}</div>
-          <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff6961" : "#42b72a"}"
-            onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
-            ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
-          </button>
-          <select onchange="selectSuperlative('${f.img}', this.value)">
-            <option value="" disabled selected>Superlative Nomination</option>
-            ${specialCategories.map(cat => `<option value="${cat}" ${categoryVotes[f.img] === cat ? 'selected' : ''}>${cat}</option>`).join('')}
-          </select>
+      track.innerHTML = finds.map(f => `
+        <div class="slide">
+          <div class="card">
+            <div class="date">${f.date}</div>
+            <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
+            <div class="title">${f.title}</div>
+            <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff6961" : "#42b72a"}"
+              onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
+              ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
+            </button>
+          <div class="category-votes">
+            <select class="cat-dropdown" onchange="toggleCategoryVote('${f.img}', this.value)">
+              <option value="">Superlative Nomination</option>
+              ${specialCategories.map(cat => `
+                <option value="${cat}" ${categoryVotes[f.img]?.includes(cat) ? "selected" : ""}>${cat}</option>
+              `).join("")}
+             </select>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
-  updateTransform(0);
-}
+      `).join("");
+      updateTransform(0);
+    }
 
     function renderGrid() {
   grid.innerHTML = finds.map(f => `
