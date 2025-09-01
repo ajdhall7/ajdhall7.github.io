@@ -110,6 +110,21 @@
       background: #42b72a;
       color: #fff;
     }
+    .cat-btn {
+      margin: 4px 2px 0 2px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #f0f2f5;
+      color: #1c1e21;
+    }
+    .cat-btn.voted {
+      background: #1877f2;
+      color: #fff;
+    }
 
     /* ===== Grid View ===== */
     .grid {
@@ -131,6 +146,7 @@
     .grid-item .frame { width: 100%; aspect-ratio: 1206 / 1405; border-radius: 8px; }
     .grid-item .title { font-size: 14px; margin-top: 8px; text-align: center; }
     .grid-item .vote-btn { margin-top: 8px; padding: 10px; font-size: 14px; }
+    .grid-item .category-votes { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 
     /* ===== Nominations List ===== */
     #nominationsList {
@@ -153,6 +169,18 @@
     }
     #nominationsList li {
       margin: 6px 0;
+    }
+    #shareBtn {
+      margin-top: 12px;
+      width: 100%;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      background: #1877f2;
+      color: #fff;
     }
 
     /* Navigation arrows */
@@ -202,6 +230,16 @@
 
   <script>
     const VOTE_KEY = "nominations_2025_08";
+    const CATEGORY_KEY = "categoryVotes_2025_08";
+
+    const specialCategories = [
+      "Funniest Find",
+      "Weirdest Find",
+      "Most 'I Want That' Find",
+      "Most Iconic",
+      "Biggest Bargain",
+      "Most Underwhelming"
+    ];
 
     const finds = [
       { date: "Aug 5, 2025", title: "$10 African American", img: "IMG_4727.jpeg" },
@@ -237,6 +275,7 @@
     const list  = document.getElementById("nominationsList");
 
     let nominations = JSON.parse(localStorage.getItem(VOTE_KEY)) || [];
+    let categoryVotes = JSON.parse(localStorage.getItem(CATEGORY_KEY)) || {};
 
     function escapeQuotes(s){
       return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -250,13 +289,29 @@
       if (isNominated(title)) {
         nominations = nominations.filter(n => n.title !== title);
       } else {
-        if (nominations.length >= 10) {
+        if (nominations.length >= 10) { // limit changed to 10
           alert("You can only nominate up to 10 finds!");
           return;
         }
         nominations.push({ title, img, date });
       }
       localStorage.setItem(VOTE_KEY, JSON.stringify(nominations));
+      renderCarousel();
+      renderGrid();
+      renderNominations();
+    }
+
+    function toggleCategoryVote(img, category) {
+      if (!categoryVotes[img]) categoryVotes[img] = [];
+
+      const index = categoryVotes[img].indexOf(category);
+      if (index > -1) {
+        categoryVotes[img].splice(index, 1); // remove vote
+      } else {
+        categoryVotes[img].push(category); // add vote
+      }
+
+      localStorage.setItem(CATEGORY_KEY, JSON.stringify(categoryVotes));
       renderCarousel();
       renderGrid();
       renderNominations();
@@ -273,6 +328,14 @@
               onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
               ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
             </button>
+            <div class="category-votes">
+              ${specialCategories.map(cat => `
+                <button class="cat-btn ${categoryVotes[f.img]?.includes(cat) ? "voted" : ""}"
+                  onclick="toggleCategoryVote('${f.img}','${cat}')">
+                  ${cat}
+                </button>
+              `).join("")}
+            </div>
           </div>
         </div>
       `).join("");
@@ -285,93 +348,4 @@
           <div class="date">${f.date}</div>
           <div class="frame"><img src="${f.img}" alt="${f.title}"></div>
           <div class="title">${f.title}</div>
-          <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff6961" : "#42b72a"}"
-            onclick="toggleNomination('${escapeQuotes(f.title)}','${escapeQuotes(f.img)}','${escapeQuotes(f.date)}')">
-            ${isNominated(f.title) ? "Remove Nomination" : "Nominate"}
-          </button>
-        </div>
-      `).join("");
-    }
-
-    function renderNominations() {
-  list.innerHTML = `
-    <h2>Your Nominations (${nominations.length}/10)</h2>
-    <ul>
-      ${nominations.map(n => `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
-    </ul>
-    <button id="shareBtn" class="btn" style="margin-top:12px;">Share via SMS</button
-      `;
-
-      // Attach the share handler after the button exists in the DOM
-      const shareBtn = document.getElementById("shareBtn");
-      if (shareBtn) {
-        shareBtn.onclick = () => {
-          if (nominations.length === 0) {
-            alert("No nominations yet!");
-            return;
-          }
-
-          let message = "Here are my nominations:\n\n";
-          nominations.forEach((item, i) => {
-            message += `${i + 1}. ${item.title} (${item.date})\n`;
-          });
-
-          // Encode for SMS
-          const smsBody = encodeURIComponent(message);
-
-          // Opens SMS app with pre-filled message
-          window.location.href = `sms:?&body=${smsBody}`;
-        };
-      }
-    }
-
-    /* ===== Carousel logic ===== */
-    let index = 0, startX = 0, currentX = 0, dragging = false, slideWidth = 0;
-    const carouselShell= document.getElementById("carouselShell");
-
-    function updateTransform(offsetX = 0){
-      const slide = track.children[index];
-      if (!slide) return;
-      slideWidth = slide.offsetWidth;
-      const containerWidth = carouselShell.clientWidth;
-      const centerOffset = (containerWidth - slideWidth) / 2;
-      track.style.transition = offsetX === 0 ? "transform 0.28s ease-out" : "none";
-      track.style.transform = `translateX(${-index * slideWidth + centerOffset + offsetX}px)`;
-    }
-
-    function prevSlide(){ if (index > 0){ index--; updateTransform(0); } }
-    function nextSlide(){ if (index < finds.length - 1){ index++; updateTransform(0); } }
-
-    function onTouchStart(e){ dragging = true; startX = e.touches[0].clientX; currentX = startX; track.style.transition = "none"; }
-    function onTouchMove(e){ if (!dragging) return; const x = e.touches[0].clientX; const delta = x - startX; if (Math.abs(delta) > 5) e.preventDefault(); updateTransform(delta); currentX = x; }
-    function onTouchEnd(){ if (!dragging) return; dragging = false; const delta = currentX - startX; if (delta > 50 && index > 0){ index--; } else if (delta < -50 && index < finds.length - 1){ index++; } updateTransform(0); }
-
-    window.prevSlide = prevSlide;
-    window.nextSlide = nextSlide;
-    window.toggleNomination = toggleNomination;
-    window.switchView = function(view){
-      if (view === "grid"){
-        carouselShell.classList.add("hidden");
-        grid.classList.add("show-grid");
-      } else {
-        grid.classList.remove("show-grid");
-        carouselShell.classList.remove("hidden");
-        updateTransform();
-      }
-    };
-
-    (function init(){
-      renderCarousel();
-      renderGrid();
-      renderNominations();
-
-      const carouselEl = document.querySelector('.carousel-shell');
-      carouselEl.addEventListener("touchstart", onTouchStart, { passive: false });
-      carouselEl.addEventListener("touchmove", onTouchMove,   { passive: false });
-      carouselEl.addEventListener("touchend",  onTouchEnd,    { passive: true  });
-
-      window.addEventListener("resize", () => updateTransform(0));
-    })();
-  </script>
-</body>
-</html>
+          <button class="vote-btn" style="background:${isNominated(f.title) ? "#ff
