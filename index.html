@@ -361,16 +361,12 @@
     </div>
   `).join("");
     }
-    function renderNominations() {
-  // Split nominations and superlatives
+function renderNominations() {
+  // Only include superlatives for nominated items or items with a superlative
   const superlativeNoms = finds
-    .map(f => {
-      const cat = categoryVotes[f.img];
-      return cat && cat.length ? { title: f.title, date: f.date, superlative: cat[0] } : null;
-    })
-    .filter(Boolean);
+    .filter(f => categoryVotes[f.img]?.length) // only finds with a superlative
+    .map(f => ({ title: f.title, date: f.date, superlative: categoryVotes[f.img][0] }));
 
-  // ===== Render HTML =====
   list.innerHTML = `
     <h2>Your Nominations (${nominations.length}/10)</h2>
     <ul>
@@ -383,6 +379,7 @@
     </ul>
 
     <button id="shareBtn">Share via SMS</button>
+
   `;
 
   // ===== SMS logic =====
