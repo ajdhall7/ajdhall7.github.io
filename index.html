@@ -362,10 +362,14 @@
   `).join("");
     }
 function renderNominations() {
-  // Only include superlatives for nominated items or items with a superlative
+  // Ensure categoryVotes values are arrays
   const superlativeNoms = finds
-    .filter(f => categoryVotes[f.img]?.length) // only finds with a superlative
-    .map(f => ({ title: f.title, date: f.date, superlative: categoryVotes[f.img][0] }));
+    .filter(f => categoryVotes[f.img] && categoryVotes[f.img].length)
+    .map(f => {
+      // Force it to be an array
+      const cats = Array.isArray(categoryVotes[f.img]) ? categoryVotes[f.img] : [categoryVotes[f.img]];
+      return { title: f.title, date: f.date, superlative: cats[0] };
+    });
 
   list.innerHTML = `
     <h2>Your Nominations (${nominations.length}/10)</h2>
@@ -379,8 +383,8 @@ function renderNominations() {
     </ul>
 
     <button id="shareBtn">Share via SMS</button>
-
   `;
+}
 
   // ===== SMS logic =====
   const shareBtn = document.getElementById("shareBtn");
