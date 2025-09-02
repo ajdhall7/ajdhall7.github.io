@@ -362,42 +362,43 @@
   `).join("");
     }
     function renderNominations() {
+  // Split nominations and superlatives
+  const superlativeNoms = finds
+    .map(f => {
+      const cat = categoryVotes[f.img];
+      return cat && cat.length ? { title: f.title, date: f.date, superlative: cat[0] } : null;
+    })
+    .filter(Boolean);
+
+  // ===== Render HTML =====
   list.innerHTML = `
     <h2>Your Nominations (${nominations.length}/10)</h2>
     <ul>
-      ${nominations.map(n => {
-        const cat = categoryVotes[n.img] || "";
-        const catText = cat.length ? ` — Superlative: ${cat[0]}` : "";
-        return `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date}${catText})</span></li>`;
-      }).join("")}
+      ${nominations.map(n => `<li>✅ ${n.title} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
     </ul>
+
+    <h2>Superlative Nominations (${superlativeNoms.length})</h2>
+    <ul>
+      ${superlativeNoms.map(n => `<li>🏆 ${n.title} — ${n.superlative} <span style="color:#606770;font-size:12px">(${n.date})</span></li>`).join("")}
+    </ul>
+
     <button id="shareBtn">Share via SMS</button>
   `;
 
-  // Attach the share handler after the button exists in the DOM
+  // ===== SMS logic =====
   const shareBtn = document.getElementById("shareBtn");
   if (shareBtn) {
     shareBtn.onclick = () => {
-      if (nominations.length === 0) {
+      if (nominations.length === 0 && superlativeNoms.length === 0) {
         alert("No nominations yet!");
         return;
       }
 
-      // ===== Step 1: Split nominations into regular vs superlative =====
-      const regularNoms = nominations; // all nominations
-      const superlativeNoms = nominations
-        .map(n => {
-          const cat = categoryVotes[n.img];
-          return cat && cat.length ? { title: n.title, date: n.date, superlative: cat[0] } : null;
-        })
-        .filter(Boolean);
-
-      // ===== Step 2: Build SMS message =====
       let message = "";
 
-      if (regularNoms.length) {
+      if (nominations.length) {
         message += "My Nominations:\n\n";
-        regularNoms.forEach((item, i) => {
+        nominations.forEach((item, i) => {
           message += `${i + 1}. ${item.title} (${item.date})\n`;
         });
         message += "\n";
@@ -410,7 +411,6 @@
         });
       }
 
-      // Encode and send SMS
       const smsBody = encodeURIComponent(message);
       window.location.href = `sms:?&body=${smsBody}`;
     };
